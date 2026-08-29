@@ -101,23 +101,6 @@ Type `yes`/`no` at each prompt as requested.
 **Note:** if the repo uses Docker, make sure Docker Desktop is running
 before starting the agent.
 
-## Project structure
-
-proj/
-├── main.py # Agent definition + CLI entry point
-├── tools/
-│ ├── git_tools.py # clone_repo
-│ ├── fs_tools.py # scan_repo_tree
-│ ├── detect_tools.py # detect_stack
-│ ├── prereq_tools.py # check_prerequisites
-│ ├── native_setup_tools.py # create_venv, get_venv_python_path
-│ ├── shell_tools.py # run_shell (sandboxed, whitelisted executor)
-│ ├── docker_tools.py # find_compose_file
-│ └── verify_tools.py # (in progress) verify_setup
-├── pyproject.toml
-└── uv.lock
-
-
 ## Tech stack
 
 - [DeepAgents](https://github.com/langchain-ai/deepagents) on LangGraph —

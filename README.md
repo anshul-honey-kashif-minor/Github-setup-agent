@@ -1,4 +1,4 @@
-# Repo Setup Agent
+# SetupPilot (Repo Setup Agent)
 
 An AI agent that automates local development environment setup for open-source
 repositories. Give it a GitHub repo URL and a destination folder, and it clones
@@ -7,12 +7,14 @@ and sets up the environment — with human confirmation required before any
 install command actually runs.
 
 Built with [DeepAgents](https://github.com/langchain-ai/deepagents) (on
-LangGraph) + Groq for LLM inference.
+LangGraph) + Groq for LLM inference. Now includes a Streamlit-based frontend
+(`app.py`) in addition to the original CLI (`main.py`).
 
 ## Status: Work in Progress
 
 This is an active capstone project. Phases 0–3 are complete and tested.
-Phase 4 (verification) and some polish items are still in progress.
+Phase 4 (verification) and some polish items are still in progress. A
+Streamlit frontend is under active development on the `frontend` branch.
 
 ### ✅ Completed
 
@@ -38,6 +40,19 @@ Phase 4 (verification) and some polish items are still in progress.
   `docker-configure.yaml` variants, brings up services with
   `docker compose up -d` (confirmation-gated), and verifies containers
   are running via `docker compose ps`.
+- **Agent logic refactor**: agent construction (model, system prompt, tools,
+  checkpointer) extracted into `agent_core.py` so both the CLI (`main.py`)
+  and the Streamlit frontend (`app.py`) share the same underlying agent.
+- **Streamlit frontend (in progress, `frontend` branch)**:
+  - Repo URL + destination folder inputs (with native OS folder picker)
+  - Live streaming display of each tool call and its output as the agent runs
+  - Two-stage human-in-the-loop UI: "proceed with installation?" confirmation,
+    followed by an explicit **Approve / Reject** step showing the exact shell
+    command before it runs
+  - Persistent run log stored in `st.session_state`, so progress isn't lost
+    across reruns/button clicks
+  - Dedicated final result card (success/failure, based on exit code) shown
+    once the run completes, instead of blending into the log
 
 ### 🚧 In progress
 
@@ -52,11 +67,25 @@ Phase 4 (verification) and some polish items are still in progress.
 - **Prerequisite auto-install**: currently the agent only *reports* missing
   tools (e.g. "Node.js not found, install it from nodejs.org") rather than
   installing them — this is a deliberate safety choice, not a bug.
+- **Frontend polish** (see `frontend` branch):
+  - Reset / "Start New Run" button (no way to restart a run without
+    restarting the Streamlit process yet)
+  - Clearer `st.error()` banners for tool failures (e.g. bad repo URL,
+    non-empty destination) instead of them just appearing as agent text
+  - Live streaming of `run_shell`'s actual subprocess output (pip/npm/docker
+    logs) — currently `run_shell` blocks and returns all output at once, so
+    the UI shows a spinner until the whole command finishes rather than
+    line-by-line output
+  - Long-running installs (multiple minutes) can trigger a Streamlit
+    WebSocket reconnect that resets `st.session_state` — needs a background
+    thread + polling fix
+  - Pre-flight checklist (Docker Desktop running, internet connection,
+    folder permissions, `GROQ_API_KEY` set) and a sidebar phase tracker
 
 ### Not started yet
 
 - Final CLI polish (currently uses raw `input()` prompts)
-- Cleanup of scratch/debug test scripts
+- Cleanup of scratch/debug test scripts (e.g. `test.py`)
 
 ## Setup
 
@@ -70,10 +99,13 @@ uv sync
 
 Create a `.env` file in the project root:
 
+```
 GROQ_API_KEY=your_key_here
-
+```
 
 ## How to run
+
+### CLI
 
 ```bash
 uv run main.py
@@ -98,8 +130,20 @@ The agent will then:
 
 Type `yes`/`no` at each prompt as requested.
 
+### Frontend (Streamlit) — in progress, `frontend` branch
+
+```bash
+uv add streamlit   # first time only
+uv run streamlit run app.py
+```
+
+Opens at `localhost:8501`. Same clone → analyze → detect → check → confirm →
+install → report flow as the CLI, with a browser UI: repo URL / destination
+inputs, a live progress log, and explicit Approve/Reject buttons before any
+install command runs.
+
 **Note:** if the repo uses Docker, make sure Docker Desktop is running
-before starting the agent.
+before starting the agent, in either the CLI or the frontend.
 
 ## Tech stack
 
@@ -108,3 +152,4 @@ before starting the agent.
 - [Groq](https://groq.com) (`openai/gpt-oss-20b`) — LLM inference
 - `uv` — Python environment/dependency management
 - `GitPython` — repo cloning
+- [Streamlit](https://streamlit.io) — frontend UI (in progress)

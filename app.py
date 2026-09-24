@@ -1,5 +1,6 @@
 import streamlit as st
 import tkinter as tk
+from uuid import uuid4
 from tkinter import filedialog
 from agent_core import build_agent
 from langgraph.types import Command
@@ -38,7 +39,7 @@ def pick_folder():
         st.session_state.dest_path = folder
 
 # --- Input form ---
-st.subheader("1. Configure")
+st.subheader("1. Enter Details")
 
 repo_url = st.text_input(
     "GitHub Repo URL",
@@ -58,13 +59,19 @@ with browse_col:
         st.rerun()
 
 st.write("")  # small spacing
-if "agent_state" not in st.session_state:
+def start_new_run():
+    """Reset Streamlit and LangGraph state while keeping the user's form inputs."""
     agent, checkpointer = build_agent()
     st.session_state.agent = agent
-    st.session_state.thread_id = "streamlit-session-1"
+    st.session_state.checkpointer = checkpointer
+    st.session_state.thread_id = f"streamlit-session-{uuid4().hex}"
     st.session_state.agent_state = "idle"  # idle | analyzing | awaiting_confirm | running
     st.session_state.pending_interrupt = None
     st.session_state.log = []
+
+
+if "agent_state" not in st.session_state:
+    start_new_run()
 
 config = {"configurable": {"thread_id": st.session_state.thread_id}}
 
@@ -169,6 +176,15 @@ run_clicked = st.button(
     disabled=(st.session_state.agent_state != "idle"),
     key="btn_run_agent"
 )
+
+if st.button(
+    "Start New Run",
+    use_container_width=True,
+    disabled=(st.session_state.agent_state == "idle" and not st.session_state.log),
+    key="btn_start_new_run",
+):
+    start_new_run()
+    st.rerun()
 
 if run_clicked:
     if not repo_url or not dest_path:

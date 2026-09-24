@@ -51,6 +51,8 @@ Streamlit frontend is under active development on the `frontend` branch.
     command before it runs
   - Persistent run log stored in `st.session_state`, so progress isn't lost
     across reruns/button clicks
+  - Reset / "Start New Run" button that clears the current log, pending
+    approvals, and LangGraph thread without restarting Streamlit
   - Dedicated final result card (success/failure, based on exit code) shown
     once the run completes, instead of blending into the log
 
@@ -68,8 +70,6 @@ Streamlit frontend is under active development on the `frontend` branch.
   tools (e.g. "Node.js not found, install it from nodejs.org") rather than
   installing them — this is a deliberate safety choice, not a bug.
 - **Frontend polish** (see `frontend` branch):
-  - Reset / "Start New Run" button (no way to restart a run without
-    restarting the Streamlit process yet)
   - Clearer `st.error()` banners for tool failures (e.g. bad repo URL,
     non-empty destination) instead of them just appearing as agent text
   - Live streaming of `run_shell`'s actual subprocess output (pip/npm/docker

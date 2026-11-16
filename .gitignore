@@ -1,5 +1,25 @@
-.env
-.venv
+# Python-generated files
 __pycache__/
-*.pyc
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets and local output
+.env
+logs/
+
+# Test and lint caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Repos cloned by the app, and test.sh results
 workspace/
+test-results/

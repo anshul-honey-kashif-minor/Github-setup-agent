@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import repo_picker %}
+{% block title %}Set up a repo · {% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Set up a GitHub repo</h1>
+  <p class="lead">SetupPilot downloads the repo, checks your tools and installs what it needs. It asks you before every command.</p>
+</div>
+<div class="split">
+  <form id="setup-form" class="card">
+    {{ repo_picker("Like https://github.com/pypa/sampleproject.", "h2") }}
+    <div class="field">
+      <label for="dest-dir">Folder to put the repo in</label>
+      <div class="row">
+        <input id="dest-dir" name="dest_dir" required maxlength="500" placeholder="{{ folder_example }}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="dest-dir-hint pick-note">
+        {% if not folder_problem %}<button type="button" id="browse" class="secondary">Browse…</button>{% endif %}
+      </div>
+      <p id="dest-dir-hint" class="hint">It must already exist. SetupPilot makes a new folder named after the repo inside it. You can type ~ for your home folder.{% if folder_problem %} There is no Browse button here ({{ folder_problem }}), so type the full path.{% endif %}</p>
+      <p id="pick-note" class="hint" role="status"></p>
+    </div>
+    <div class="field">
+      <label class="check-row">
+        <input type="checkbox" id="use-docker" name="use_docker" aria-describedby="docker-hint">
+        <span>Install inside a Docker container</span>
+      </label>
+      <p id="docker-hint" class="hint indent">Safer for repos you do not fully trust. It is not a full sandbox here, because a container can reach this app. For a repo you do not trust at all, close this app and run <code>setuppilot run &lt;url&gt; &lt;folder&gt; --docker</code> in a terminal.</p>
+      <p id="docker-problem" class="callout bad" hidden></p>
+    </div>
+    <div class="callout warn">
+      <div>
+        <strong>Before you start</strong>
+        <p>{{ warning }}</p>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" id="start">Start setup</button>
+    </div>
+  </form>
+  <section class="card" aria-labelledby="preflight-title">
+    <div class="card-head">
+      <h2 id="preflight-title">Pre-flight check</h2>
+      <button type="button" id="preflight-again" class="secondary small">Check again</button>
+    </div>
+    <p id="preflight-summary" class="summary" role="status">Checking…</p>
+    <ul id="preflight" class="checks"><li class="pending">Checking…</li></ul>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='github.js') }}"></script>
+<script src="{{ url_for('static', filename='setup.js') }}"></script>{% endblock %}

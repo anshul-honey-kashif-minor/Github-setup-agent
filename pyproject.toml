@@ -1,20 +1,99 @@
 [project]
-name = "proj"
-version = "0.1.0"
-description = "Add your description here"
+name = "setuppilot"
+version = "0.2.0"
+description = "AI agent that sets up a GitHub repo on your machine, with your approval, plus a chatbot that answers questions about the repo."
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "deepagents>=0.7.5",
-    "gitpython>=3.1.59",
-    "langchain-groq>=1.1.3",
-    "python-dotenv>=1.2.2",
-    "rich>=15.0.0",
-    "typer>=0.27.1",
+license = "MIT"
+authors = [{ name = "Anshul A Singh" }, { name = "Honey Verma" }, { name = "Mohammad Kashif" }]
+keywords = ["developer-tools", "setup", "ai-agent", "langgraph", "rag", "flask"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Build Tools",
 ]
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0",
+    "httpx>=0.28",
+    "keyring>=25.7",
+    "langgraph>=0.6",
+    "langgraph-checkpoint-postgres>=2.0",
+    "langsmith>=0.4",
+    "openai>=2.0",
+    "psycopg-pool>=3.2",
+    "psycopg[binary]>=3.2",
+    "pydantic>=2.9",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "sentence-transformers>=3.0",
+    "torch>=2.5",
+]
+
+[project.scripts]
+setuppilot = "setuppilot.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+# CPU-only PyTorch on Linux (CI): the default Linux wheel brings GBs of GPU code we never use.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [dependency-groups]
 dev = [
-    "pytest>=9.1.1",
-    "ruff>=0.16.2",
+    "mypy>=2.4.1",
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.3",
+    "types-pyyaml>=6.0.12",
 ]
+# The browser click-through (scripts/browser_check.py); kept apart so a normal install stays small.
+e2e = ["playwright>=1.64.1"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "S", "PLE"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S104", "S106", "S108", "S603", "S607"]
+
+[tool.mypy]
+files = ["src", "scripts/acceptance.py"]
+python_version = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# Raised inside the langsmith package itself, not by our code. With PYTHONWARNDEFAULTENCODING=1
+# (the Windows CI job), a text file our code opens without an encoding fails the test, because
+# Windows would read it as cp1252, not UTF-8.
+filterwarnings = [
+    "ignore:langsmith.wrappers._openai_agents is deprecated:DeprecationWarning",
+    "error::EncodingWarning:setuppilot.*",
+]
+
+[tool.coverage.run]
+source = ["setuppilot"]
+branch = true
+
+[tool.coverage.report]
+# Measured 88% on 2026-11-03 without Postgres (93% in CI with it). Raise it as tests grow.
+fail_under = 85

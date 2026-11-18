@@ -1,6 +1,5 @@
 # SetupPilot
 
-[![CI](https://github.com/Kapurrrishabh/setup-pilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Kapurrrishabh/setup-pilot/actions/workflows/ci.yml)
 ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -50,7 +49,7 @@ winget install --id astral-sh.uv -e
 ```
 
 ```powershell
-git clone https://github.com/Kapurrrishabh/setup-pilot.git setuppilot; cd setuppilot
+git clone https://github.com/anshul-honey-kashif-minor/Github-setup-agent setuppilot; cd setuppilot
 uv sync                    # installs everything, about 1 GB (PyTorch for the chatbot's embeddings)
 copy .env.example .env     # then add your free Groq key, and your Supabase URL (see Database)
 uv run setuppilot db-check # optional: checks the database and makes the tables
@@ -60,7 +59,7 @@ uv run setuppilot web      # open http://127.0.0.1:5005
 **macOS and Linux.** Install git and uv your usual way (for example `brew install git uv`), then:
 
 ```bash
-git clone https://github.com/Kapurrrishabh/setup-pilot.git setuppilot && cd setuppilot
+git clone  https://github.com/anshul-honey-kashif-minor/Github-setup-agent
 uv sync
 cp .env.example .env
 uv run setuppilot db-check

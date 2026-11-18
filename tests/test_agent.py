@@ -57,6 +57,8 @@ class FakeRunner:
             (command.cwd / self._venv_python).write_text("", encoding="utf-8")
         if command.text in {"npm ci", "npm install"}:
             (command.cwd / "node_modules").mkdir(exist_ok=True)
+        if "cmake" in command.text or "meson" in command.text:
+            (command.cwd / "build").mkdir(exist_ok=True)
         is_failing = command.text in self._failing or command.text in self._failing_once
         if command.text in self._failing_once:
             self._failing_once.remove(command.text)
@@ -130,6 +132,50 @@ def test_pip_repo_installs_into_a_venv_and_is_verified(tmp_path):
         "uv pip install --python .venv -r requirements.txt",
         "uv pip check --python .venv",
     ]
+    assert deps.runs.get_run(outcome.run_id).status == "succeeded"
+
+
+def test_cmake_repo_installs_and_is_verified(tmp_path):
+    cmake_repo = {
+        "CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\nproject(demo)\n",
+        "README.md": "# Bitcoin / CMake Demo\nBuild with cmake\n",
+    }
+    runner = FakeRunner()
+    agent, deps = make_agent(tmp_path, cmake_repo, runner=runner)
+    outcome = approve_all(agent, start(agent, tmp_path))
+    assert isinstance(outcome, Finished) and outcome.is_verified
+    assert runner.texts == ["cmake -B build", "cmake --build build"]
+    assert deps.runs.get_run(outcome.run_id).status == "succeeded"
+
+
+def test_makefile_repo_installs_and_is_verified(tmp_path):
+    make_repo = {"Makefile": "all:\n\tgcc main.c\n", "README.md": "# Make Demo\n"}
+    runner = FakeRunner()
+    agent, deps = make_agent(tmp_path, make_repo, runner=runner)
+    outcome = approve_all(agent, start(agent, tmp_path))
+    assert isinstance(outcome, Finished) and outcome.is_verified
+    assert runner.texts == ["make", "make"]
+    assert deps.runs.get_run(outcome.run_id).status == "succeeded"
+
+
+def test_cmake_project_with_ai_planning_is_verified(tmp_path):
+    cmake_repo = {
+        "CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\nproject(demo)\n",
+        "README.md": "# Bitcoin\nBuild using cmake\n",
+    }
+    project = ai_project(
+        manager="cmake",
+        languages=["cpp"],
+        steps=[ai_step("cmake -B build"), ai_step("cmake --build build", phase="verify")],
+        evidence=["CMakeLists.txt"],
+    )
+    llm = make_client(FakeTransport(analysis_reply(project), reply("Setup succeeded.")))
+    runner = FakeRunner()
+    agent, deps = make_agent(tmp_path, cmake_repo, llm=llm, runner=runner)
+    outcome = approve_all(agent, start(agent, tmp_path))
+    assert isinstance(outcome, Finished) and outcome.is_verified
+    assert "cmake -B build" in runner.texts
+    assert "cmake --build build" in runner.texts
     assert deps.runs.get_run(outcome.run_id).status == "succeeded"
 
 

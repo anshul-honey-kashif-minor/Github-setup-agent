@@ -147,7 +147,10 @@ def test_a_tool_is_required_when_either_the_files_or_the_ai_say_so():
     ]
 
 
-@pytest.mark.parametrize(("name", "tool"), [("python", "uv"), ("node", "node"), ("other", None)])
+@pytest.mark.parametrize(
+    ("name", "tool"),
+    [("python", "uv"), ("node", "node"), ("cmake", "cmake"), ("make", "make"), ("other", None)],
+)
 def test_ai_tool_names_map_to_tools_setuppilot_can_check(name, tool):
     assert prereqs.known_tool(name) == tool
 
@@ -204,7 +207,9 @@ def test_uv_tool_installs_are_offered_only_when_uv_is_there(os_name):
      (r".\mvnw.cmd compile", "windows", ["java"]),
      ("git submodule update --init", "posix", ["git"]),
      ("docker compose up -d", "posix", ["docker", "docker compose", "docker engine"]),
-     (".venv/bin/python -c 'import x'", "posix", [])],
+     (".venv/bin/python -c 'import x'", "posix", []),
+     ("cmake -B build", "posix", ["cmake"]),
+     ("make", "posix", ["make"])],
 )  # fmt: skip
 def test_a_command_needs_the_tools_its_program_runs_on(text, target, tools):
     assert [need.tool for need in prereqs.needs_for_command(text, target)] == tools

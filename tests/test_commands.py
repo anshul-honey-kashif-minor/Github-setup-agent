@@ -284,7 +284,9 @@ def test_uv_pip_with_the_repo_venv_passes(guard, text):
      "dotnet build -p:Configuration=Release", "dotnet build -P:configuration=Debug",
      "dotnet build -property:TargetFramework=net8.0", "composer install --no-interaction",
      "composer validate --no-check-publish", "composer check-platform-reqs --no-plugins",
-     "dart pub get", "flutter pub get"],
+     "dart pub get", "flutter pub get", "cmake -B build", "cmake --build build",
+     "cmake -S . -B build", "make", "make build", "make check", "ninja", "ninja check",
+     "meson setup build", "meson compile -C build"],
 )  # fmt: skip
 def test_new_ecosystems_allow_their_install_and_build_verbs(guard, target, text):
     validate_command(text, guard, target)
@@ -314,7 +316,7 @@ def test_new_ecosystems_allow_their_install_and_build_verbs(guard, target, text)
      "composer global require x", "composer create-project x",
      "composer run-script post-install", "composer exec evil", "composer validate",
      "dart pub global activate x", "dart run", "flutter run", "flutter create x",
-     "make", "make install", "cmake -B build", "cmake --build build"],
+     "cmake -B ../outside", "make --global"],
 )  # fmt: skip
 def test_new_ecosystems_refuse_running_code_or_installing_globally(guard, text):
     with pytest.raises(CommandBlocked):
@@ -344,6 +346,7 @@ def test_allowlist_digest_shows_only_the_layout_of_its_own_system():
      ("mvn dependency:resolve", ("mvn", "dependency:resolve")),
      ("uv pip install --python .venv -e .", ("uv", "pip", "install")),
      ("docker compose -f a.yml up -d --wait", ("docker", "compose", "up", "-d")),
+     ("cmake -B build", ("cmake", "-B")), ("make", ("make",)), ("make check", ("make", "check")),
      ("npm run build", None), ("curl x", None), ("'unclosed", None)],
 )  # fmt: skip
 def test_command_verb_matches_a_wrapper_to_its_tool_and_refuses_the_rest(text, verb):

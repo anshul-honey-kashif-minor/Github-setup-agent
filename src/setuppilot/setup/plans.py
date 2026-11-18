@@ -18,7 +18,7 @@ from setuppilot.tools.scan import scan_repo
 _PYTHON_MANAGERS = {"pip", "uv", "poetry", "pipenv", "pdm"}
 SUPPORTED_MANAGERS = _PYTHON_MANAGERS | _NODE_MANAGERS | {
     "conda", "go", "cargo", "bundler", "maven", "gradle", "compose", "dotnet", "composer",
-    "dart", "flutter",
+    "dart", "flutter", "cmake", "make", "ninja", "meson", "conan", "vcpkg",
 }  # fmt: skip
 # conda puts python.exe at the top of a Windows environment, not in bin/.
 _CONDA_PYTHON: dict[ExecTarget, str] = {
@@ -107,6 +107,18 @@ def install_plan(
         case "dart" | "flutter":
             command = f"{candidate.manager} pub get"
             return [PlannedCommand(command, "Download the Dart packages.")]
+        case "cmake":
+            return [PlannedCommand("cmake -B build", "Configure the CMake build in the build folder.")]
+        case "make":
+            return [PlannedCommand("make", "Build the project.")]
+        case "ninja":
+            return [PlannedCommand("ninja", "Build the project.")]
+        case "meson":
+            return [PlannedCommand("meson setup build", "Configure the Meson build in the build folder.")]
+        case "conan":
+            return [PlannedCommand("conan install . --build=missing", "Install Conan dependencies.")]
+        case "vcpkg":
+            return [PlannedCommand("vcpkg install", "Install vcpkg dependencies.")]
     raise StackNotFound(
         f"SetupPilot cannot set up a {candidate.stack} project with {candidate.manager} yet.",
         details="Set it up by hand for now, using the repo's README.",
@@ -181,6 +193,14 @@ def code_checks(
         case "dotnet":
             command = f"dotnet build {candidate.evidence[0]} --no-restore"
             return [PlannedCommand(command, "Check: the .NET code builds (runs its build steps).")]
+        case "cmake":
+            return [PlannedCommand("cmake --build build", "Check: the CMake project builds.")]
+        case "make":
+            return [PlannedCommand("make", "Check: the project builds.")]
+        case "ninja":
+            return [PlannedCommand("ninja", "Check: the project builds.")]
+        case "meson":
+            return [PlannedCommand("meson compile -C build", "Check: the Meson project builds.")]
     return []
 
 
@@ -224,6 +244,8 @@ def quiet_checks(
     elif manager in ("dart", "flutter"):
         path = ".dart_tool/package_config.json"
         checks.append(_exists(repo, path, "Dart packages are installed"))
+    elif manager in ("cmake", "meson"):
+        checks.append(_exists(repo, "build", f"{manager.capitalize()} build folder exists"))
     return checks
 
 

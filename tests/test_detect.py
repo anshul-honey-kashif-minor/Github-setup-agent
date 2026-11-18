@@ -228,16 +228,29 @@ def test_flutter_app_is_told_apart_from_a_plain_dart_package(tmp_path, pubspec, 
     assert found(detect(tmp_path, {"pubspec.yaml": pubspec})) == [("dart", manager)]
 
 
+def test_cmake_repo(tmp_path):
+    files = {"CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\nproject(demo)\n"}
+    result = detect(tmp_path, files)
+    assert found(result) == [("cpp", "cmake")]
+    assert result.candidates[0].version_hint == "3.20"
+
+
+def test_makefile_repo(tmp_path):
+    result = detect(tmp_path, {"Makefile": "all:\n\tgcc main.c\n"})
+    assert found(result) == [("c", "make")]
+
+
 def test_every_detected_manager_has_the_stack_the_ai_options_use(tmp_path):
     files = {
         "requirements.txt": "", "package.json": "{}", "yarn.lock": "", "go.mod": "",
         "Cargo.toml": "", "Gemfile": "", "pom.xml": "", "build.gradle": "", "environment.yml": "",
         "x.csproj": "", "composer.json": "{}", "pubspec.yaml": "", "Dockerfile": "",
+        "CMakeLists.txt": "",
     }  # fmt: skip
     candidates = detect(tmp_path, files).candidates
     assert {c.manager for c in candidates} == {
         "pip", "conda", "yarn", "go", "cargo", "bundler", "maven", "gradle", "dotnet",
-        "composer", "dart", "dockerfile",
+        "composer", "dart", "dockerfile", "cmake",
     }  # fmt: skip
     assert all(STACK_FOR_MANAGER[c.manager] == c.stack for c in candidates)
 

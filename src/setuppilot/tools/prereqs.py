@@ -211,6 +211,52 @@ TOOLS: dict[str, ToolSpec] = {
         ("flutter", "--version"),
         "Install Flutter (a large download): https://docs.flutter.dev/get-started/install",
     ),
+    "cmake": _tool(
+        ("cmake", "--version"),
+        "Install CMake: https://cmake.org/download/",
+        _winget("Kitware.CMake", "https://cmake.org/download/", needs_admin=True),
+        _brew("cmake", "https://cmake.org/download/"),
+        _linux("cmake", "cmake"),
+    ),
+    "ctest": _tool(
+        ("ctest", "--version"),
+        "CTest comes with CMake: https://cmake.org/download/",
+        _winget("Kitware.CMake", "https://cmake.org/download/", needs_admin=True),
+        _brew("cmake", "https://cmake.org/download/"),
+        _linux("cmake", "cmake"),
+    ),
+    "make": _tool(
+        ("make", "--version"),
+        "Install Make (build-essential on Linux, Xcode Command Line Tools on macOS).",
+        _winget(
+            "GnuWin32.Make", "https://gnuwin32.sourceforge.net/packages/make.htm", needs_admin=True
+        ),
+        _brew("make", "Install Make: brew install make"),
+        _linux("build-essential", "make"),
+    ),
+    "ninja": _tool(
+        ("ninja", "--version"),
+        "Install Ninja: https://ninja-build.org/",
+        _winget("Ninja-build.Ninja", "https://ninja-build.org/", needs_admin=True),
+        _brew("ninja", "https://ninja-build.org/"),
+        _linux("ninja-build", "ninja-build"),
+    ),
+    "meson": _tool(
+        ("meson", "--version"),
+        "Install Meson: https://mesonbuild.com/",
+        _winget("Mesonbuild.Meson", "https://mesonbuild.com/", needs_admin=True),
+        _brew("meson", "https://mesonbuild.com/"),
+        _linux("meson", "meson"),
+    ),
+    "conan": _tool(
+        ("conan", "--version"),
+        "Install Conan: https://conan.io/downloads",
+        _uv_tool("conan", "https://conan.io/downloads"),
+    ),
+    "vcpkg": _tool(
+        ("vcpkg", "version"),
+        "Install vcpkg: https://vcpkg.io/en/getting-started",
+    ),
 }
 _TOOLS_FOR_MANAGER: dict[str, tuple[str, ...]] = {
     "pip": ("uv",),
@@ -234,13 +280,29 @@ _TOOLS_FOR_MANAGER: dict[str, tuple[str, ...]] = {
     "composer": ("php", "composer"),
     "dart": ("dart",),
     "flutter": ("flutter",),
+    "cmake": ("cmake",),
+    "make": ("make",),
+    "ninja": ("ninja",),
+    "meson": ("meson",),
+    "conan": ("conan",),
+    "vcpkg": ("vcpkg",),
 }
 # The tool a detected version hint is about. uv picks Python by itself. go.mod's go line is only
 # a minimum, so any newer Go builds the module.
-_HINTED_TOOL = {"node": "node", "rust": "cargo", "ruby": "ruby", "go": "go", "dotnet": "dotnet"}
-_MINIMUM_HINTS = {"go"}
+_HINTED_TOOL = {
+    "node": "node", "rust": "cargo", "ruby": "ruby", "go": "go", "dotnet": "dotnet",
+    "cpp": "cmake",
+}
+_MINIMUM_HINTS = {"go", "cpp"}
 # The manager whose tools a program needs, where the two names differ.
-_MANAGER_FOR_PROGRAM = {"bundle": "bundler", "mvn": "maven", "docker": "compose"}
+_MANAGER_FOR_PROGRAM = {
+    "bundle": "bundler",
+    "mvn": "maven",
+    "docker": "compose",
+    "ctest": "cmake",
+    "mingw32-make": "make",
+    "nmake": "make",
+}
 # The program each kind of install command runs, so it is offered only when that is there.
 _INSTALLERS: dict[RecipeKind, tuple[str, ...]] = {
     "winget": ("winget", "--version"),

@@ -24,7 +24,7 @@ the newest code on `main` gets fixes.
   `-toolexec`, `-exec`, `-ldflags` and `-gccgoflags`, cargo's `--config` and `-Z`, and dotnet's
   `-t`, loggers and `@` files. dotnet's `-p` may set only Configuration and TargetFramework:
   other properties, like PreBuildEvent, can run any command. For Maven and Gradle every goal is
-  checked, not just the first. `make` and `cmake` are never allowed.
+  checked, not just the first. For CMake, Make and Ninja, standard build and check forms are allowed.
 - **Everything stays in the repo folder.** Every path is resolved and must stay inside the cloned
   repo: `..`, `~`, absolute paths outside it and symlinks that point out are refused, also
   inside folders that are not scanned (like `build/`). A short flag glued to a path (`-C..`,

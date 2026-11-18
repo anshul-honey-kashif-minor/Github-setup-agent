@@ -59,6 +59,10 @@ def quiet_checks(candidate, repo, run, target="posix"):
         (cand("php", "composer", ["composer.json"]), set(), ["composer install --no-interaction"]),
         (cand("dart", "dart", ["pubspec.yaml"]), set(), ["dart pub get"]),
         (cand("dart", "flutter", ["pubspec.yaml"]), set(), ["flutter pub get"]),
+        (cand("cpp", "cmake", ["CMakeLists.txt"]), set(), ["cmake -B build"]),
+        (cand("c", "make", ["Makefile"]), set(), ["make"]),
+        (cand("cpp", "ninja", ["build.ninja"]), set(), ["ninja"]),
+        (cand("cpp", "meson", ["meson.build"]), set(), ["meson setup build"]),
     ],
 )  # fmt: skip
 def test_install_plan_for_each_stack(candidate, top, expected):
@@ -84,6 +88,10 @@ def test_stack_without_a_plan_says_so_plainly():
         (cand("ruby", "bundler"), (), ["bundle check"]),
         (cand("dotnet", "dotnet", ["App.csproj"]), (), ["dotnet build App.csproj --no-restore"]),
         (cand("php", "composer"), (), []),
+        (cand("cpp", "cmake"), (), ["cmake --build build"]),
+        (cand("c", "make"), (), ["make"]),
+        (cand("cpp", "ninja"), (), ["ninja"]),
+        (cand("cpp", "meson"), (), ["meson compile -C build"]),
     ],
 )  # fmt: skip
 def test_checks_that_run_project_code_for_each_stack(candidate, files, expected):

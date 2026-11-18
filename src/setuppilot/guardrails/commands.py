@@ -21,6 +21,13 @@ ExecTarget = Literal["posix", "windows"]
 Rule = tuple[tuple[str, ...], ...]
 _MAVEN: Rule = (("dependency:resolve",), ("dependency:go-offline",), ("compile",))
 _GRADLE: Rule = (("dependencies",), ("assemble",))
+_CMAKE: Rule = (("-B",), ("--build",), ("-S",), ("-G",), ("--install",), (".",))
+_MAKE: Rule = (("all",), ("build",), ("check",), ("test",), ("-C",), ())
+_NINJA: Rule = (("all",), ("build",), ("check",), ("test",), ("-C",), ())
+_CTEST: Rule = (("--test-dir",), ("-V",), ("--output-on-failure",), ())
+_MESON: Rule = (("setup",), ("compile",), ("test",), ("install",))
+_CONAN: Rule = (("install",), ("build",), ("create",))
+_VCPKG: Rule = (("install",), ("integrate",))
 # Each tool on PATH, and the sub-commands it may start with. Anything else is blocked.
 # Python always goes through uv into the project's .venv, never into the system Python.
 ALLOWED: dict[str, Rule] = {
@@ -55,6 +62,15 @@ ALLOWED: dict[str, Rule] = {
     ),
     "dart": (("pub", "get"),),
     "flutter": (("pub", "get"),),
+    "cmake": _CMAKE,
+    "make": _MAKE,
+    "ninja": _NINJA,
+    "ctest": _CTEST,
+    "meson": _MESON,
+    "conan": _CONAN,
+    "vcpkg": _VCPKG,
+    "mingw32-make": _MAKE,
+    "nmake": _MAKE,
 }
 VENV_PYTHON: dict[ExecTarget, str] = {
     "posix": ".venv/bin/python",
@@ -75,7 +91,10 @@ WORKSPACE_PROGRAMS: dict[ExecTarget, dict[str, Rule]] = {
     for target, wrappers in JAVA_WRAPPERS.items()
 }
 # Build tools run every goal they are given, so every word must be allowed, not only the first.
-_EVERY_WORD_CHECKED = {"mvn", "gradle"} | {w for ws in JAVA_WRAPPERS.values() for w in ws.values()}
+_EVERY_WORD_CHECKED = (
+    {"mvn", "gradle", "make", "ninja", "mingw32-make", "nmake"}
+    | {w for ws in JAVA_WRAPPERS.values() for w in ws.values()}
+)
 _NEVER = {"sudo", "su", "doas", "rm", "curl", "wget", "sh", "bash", "zsh", "eval", "chmod", "dd"}
 # Flags that install outside the project, or run another program of the caller's choice.
 _BLOCKED_FLAGS = {"--system", "--break-system-packages", "--user", "-g", "--global", "--location"}
@@ -156,7 +175,7 @@ def validate_command(text: str, guard: PathGuard, target: ExecTarget) -> SafeCom
         options = ", ".join(" ".join((argv[0], *prefix)) for prefix in rule)
         raise _blocked(text, f"Allowed forms: {options}.")
     if name in _EVERY_WORD_CHECKED:
-        allowed = {prefix[0] for prefix in rule}
+        allowed = {prefix[0] for prefix in rule if prefix}
         extra = [w for w in words if not w.startswith("-") and w not in allowed]
         if extra:
             raise _blocked(text, f"Only these goals are allowed: {', '.join(sorted(allowed))}.")
@@ -224,6 +243,12 @@ def _words_to_match(argv: list[str]) -> tuple[str, ...]:
     words = argv[1:]
     while argv[0] == "docker" and words[:1] == ["compose"] and words[1:2] in (["-f"], ["--file"]):
         words = [words[0], *words[3:]]
+    while (
+        argv[0] in ("make", "ninja", "mingw32-make", "nmake")
+        and words[:1] in (["-C"], ["--directory"])
+        and len(words) > 1
+    ):
+        words = words[2:]
     return tuple(words)
 
 

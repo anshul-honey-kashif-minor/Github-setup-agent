@@ -12,13 +12,16 @@ from setuppilot.guardrails.commands import NODE_MANAGERS as _NODE_MANAGERS
 from setuppilot.tools.compose import COMPOSE_NAMES, MAX_READ_BYTES
 from setuppilot.tools.scan import RepoScan
 
-Stack = Literal["python", "node", "go", "rust", "ruby", "java", "docker", "dotnet", "php", "dart"]
+Stack = Literal[
+    "python", "node", "go", "rust", "ruby", "java", "docker", "dotnet", "php", "dart", "cpp", "c",
+]
 STACK_FOR_MANAGER: dict[str, Stack] = {
     "pip": "python", "uv": "python", "poetry": "python", "pipenv": "python", "pdm": "python",
     "conda": "python", "npm": "node", "yarn": "node", "pnpm": "node", "bun": "node", "go": "go",
     "cargo": "rust", "bundler": "ruby", "maven": "java", "gradle": "java", "compose": "docker",
     "dockerfile": "docker", "dotnet": "dotnet", "composer": "php", "dart": "dart",
-    "flutter": "dart",
+    "flutter": "dart", "cmake": "cpp", "make": "c", "ninja": "cpp", "meson": "cpp",
+    "conan": "cpp", "vcpkg": "cpp",
 }  # fmt: skip
 
 # Lock files name the package manager. Two of them for one stack is a conflict.
@@ -59,6 +62,9 @@ MANIFEST_NAMES = (
     "build.gradle.kts",
     "composer.json",
     "pubspec.yaml",
+    "CMakeLists.txt",
+    "Makefile",
+    "meson.build",
     "Dockerfile",
     *COMPOSE_NAMES,
 )
@@ -120,6 +126,24 @@ def detect_stacks(scan: RepoScan) -> Detection:
     candidates += java
     conflicts += _lock_conflict("Java", java)
     candidates += _dotnet(top, reader) + _php(top, reader) + _dart(top, reader)
+    if "CMakeLists.txt" in top:
+        cmake_line = re.search(
+            r"cmake_minimum_required\s*\(\s*VERSION\s+([0-9.]+)",
+            reader.text("CMakeLists.txt") or "",
+            re.IGNORECASE,
+        )
+        hint = reader.hint(cmake_line.group(1) if cmake_line else None, "CMakeLists.txt")
+        candidates.append(StackCandidate("cpp", "cmake", ("CMakeLists.txt",), hint))
+    elif any(m in top for m in ("Makefile", "makefile", "GNUmakefile")):
+        make_file = next(m for m in ("Makefile", "makefile", "GNUmakefile") if m in top)
+        candidates.append(StackCandidate("c", "make", (make_file,), None))
+    elif "meson.build" in top:
+        candidates.append(StackCandidate("cpp", "meson", ("meson.build",), None))
+    elif any(c in top for c in ("conanfile.txt", "conanfile.py")):
+        conan_file = next(c for c in ("conanfile.txt", "conanfile.py") if c in top)
+        candidates.append(StackCandidate("cpp", "conan", (conan_file,), None))
+    elif "vcpkg.json" in top:
+        candidates.append(StackCandidate("cpp", "vcpkg", ("vcpkg.json",), None))
     compose = sorted(top & set(COMPOSE_NAMES), key=COMPOSE_NAMES.index)
     if compose:
         candidates.append(StackCandidate("docker", "compose", tuple(compose), None))

@@ -10,12 +10,13 @@ from setuppilot.llm.transport import JsonSchema
 Manager = Literal[
     "pip", "uv", "poetry", "pipenv", "pdm", "conda", "npm", "yarn", "pnpm", "bun", "go", "cargo",
     "bundler", "maven", "gradle", "compose", "dockerfile", "dotnet", "composer", "dart",
-    "flutter", "none", "other",
+    "flutter", "cmake", "make", "ninja", "meson", "conan", "vcpkg", "none", "other",
 ]  # fmt: skip
 ToolId = Literal[
     "uv", "python", "poetry", "pipenv", "pdm", "conda", "node", "npm", "yarn", "pnpm", "bun",
     "go", "cargo", "ruby", "bundle", "java", "mvn", "gradle", "docker", "docker compose", "git",
-    "dotnet", "php", "composer", "dart", "flutter", "other",
+    "dotnet", "php", "composer", "dart", "flutter", "cmake", "make", "ninja", "ctest", "meson",
+    "conan", "vcpkg", "other",
 ]  # fmt: skip
 Language = Literal[
     "python", "javascript", "typescript", "go", "rust", "ruby", "java", "kotlin", "csharp",
@@ -31,9 +32,13 @@ _SYNONYMS = {
     "gem": "ruby", "jdk": "java", "openjdk": "java", "gradlew": "gradle", ".net": "dotnet",
     "dotnet-sdk": "dotnet", "js": "javascript", "ts": "typescript", "c#": "csharp",
     "c++": "cpp", "postgresql": "postgres", "mongo": "mongodb", "elastic": "elasticsearch",
+    "gmake": "make", "ninja-build": "ninja", "gnu make": "make",
 }  # fmt: skip
-_MANAGER_SYNONYMS = {"mvn": "maven", "bundle": "bundler", "docker compose": "compose",
-                     "docker-compose": "compose", "pip-tools": "pip"}  # fmt: skip
+_MANAGER_SYNONYMS = {
+    "mvn": "maven", "bundle": "bundler", "docker compose": "compose",
+    "docker-compose": "compose", "pip-tools": "pip", "gnu make": "make",
+    "gmake": "make",
+}  # fmt: skip
 
 
 def _pick_from(names: Any, synonyms: dict[str, str]) -> Callable[[Any], Any]:

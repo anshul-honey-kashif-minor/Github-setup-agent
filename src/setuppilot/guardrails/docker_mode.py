@@ -28,6 +28,12 @@ DOCKER_IMAGES: dict[str, str] = {
     "dotnet": "mcr.microsoft.com/dotnet/sdk:10.0",
     "composer": "composer:2",
     "dart": "dart:stable",
+    "cmake": "gcc:bookworm",
+    "make": "gcc:bookworm",
+    "ninja": "gcc:bookworm",
+    "meson": "gcc:bookworm",
+    "conan": "gcc:bookworm",
+    "vcpkg": "gcc:bookworm",
 }
 _WORKDIR = "/work"
 # The container runs as you, not root, so tool caches live in the repo where it can write.

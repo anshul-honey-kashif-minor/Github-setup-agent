@@ -1304,7 +1304,6 @@ def _analysis(state: RunState) -> RepoAnalysis | None:
 def _options(state: RunState) -> list[PlanOption]:
     if "options" in state:
         return [_as_option(o) for o in state["options"]]
-    # A run saved before v2 was paused before its options existed.
     return [_as_option(c) for c in state["candidates"]]
 
 

@@ -273,9 +273,9 @@ def test_an_ai_plan_that_needs_a_tool_setuppilot_cannot_check_does_not_run(tmp_p
 
 
 def test_an_ai_plan_with_only_manual_steps_does_not_run(tmp_path):
-    project = ai_project(manager="other", steps=[ai_step("make", is_manual=True)],
-                         evidence=["Makefile"])  # fmt: skip
-    (option,) = options_for(tmp_path, {"Makefile": ""}, project)
+    project = ai_project(manager="other", steps=[ai_step("swift build", is_manual=True)],
+                         evidence=["Package.swift"])  # fmt: skip
+    (option,) = options_for(tmp_path, {"Package.swift": ""}, project)
     assert not option.is_runnable and "no install step" in option.note
 
 

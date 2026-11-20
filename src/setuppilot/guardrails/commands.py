@@ -91,10 +91,9 @@ WORKSPACE_PROGRAMS: dict[ExecTarget, dict[str, Rule]] = {
     for target, wrappers in JAVA_WRAPPERS.items()
 }
 # Build tools run every goal they are given, so every word must be allowed, not only the first.
-_EVERY_WORD_CHECKED = (
-    {"mvn", "gradle", "make", "ninja", "mingw32-make", "nmake"}
-    | {w for ws in JAVA_WRAPPERS.values() for w in ws.values()}
-)
+_EVERY_WORD_CHECKED = {"mvn", "gradle", "make", "ninja", "mingw32-make", "nmake"} | {
+    w for ws in JAVA_WRAPPERS.values() for w in ws.values()
+}
 _NEVER = {"sudo", "su", "doas", "rm", "curl", "wget", "sh", "bash", "zsh", "eval", "chmod", "dd"}
 # Flags that install outside the project, or run another program of the caller's choice.
 _BLOCKED_FLAGS = {"--system", "--break-system-packages", "--user", "-g", "--global", "--location"}

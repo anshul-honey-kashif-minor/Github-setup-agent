@@ -1,5 +1,6 @@
 # SetupPilot
 
+[![CI](https://github.com/anshul-honey-kashif-minor/Github-setup-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/anshul-honey-kashif-minor/Github-setup-agent/actions/workflows/ci.yml)
 ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 

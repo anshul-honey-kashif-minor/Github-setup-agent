@@ -108,15 +108,18 @@ def install_plan(
             command = f"{candidate.manager} pub get"
             return [PlannedCommand(command, "Download the Dart packages.")]
         case "cmake":
-            return [PlannedCommand("cmake -B build", "Configure the CMake build in the build folder.")]
+            command = "cmake -B build"
+            return [PlannedCommand(command, "Configure the CMake build in the build folder.")]
         case "make":
             return [PlannedCommand("make", "Build the project.")]
         case "ninja":
             return [PlannedCommand("ninja", "Build the project.")]
         case "meson":
-            return [PlannedCommand("meson setup build", "Configure the Meson build in the build folder.")]
+            command = "meson setup build"
+            return [PlannedCommand(command, "Configure the Meson build in the build folder.")]
         case "conan":
-            return [PlannedCommand("conan install . --build=missing", "Install Conan dependencies.")]
+            command = "conan install . --build=missing"
+            return [PlannedCommand(command, "Install Conan dependencies.")]
         case "vcpkg":
             return [PlannedCommand("vcpkg install", "Install vcpkg dependencies.")]
     raise StackNotFound(

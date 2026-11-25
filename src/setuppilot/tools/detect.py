@@ -14,7 +14,7 @@ from setuppilot.tools.scan import RepoScan
 
 Stack = Literal[
     "python", "node", "go", "rust", "ruby", "java", "docker", "dotnet", "php", "dart", "cpp", "c",
-]
+]  # fmt: skip
 STACK_FOR_MANAGER: dict[str, Stack] = {
     "pip": "python", "uv": "python", "poetry": "python", "pipenv": "python", "pdm": "python",
     "conda": "python", "npm": "node", "yarn": "node", "pnpm": "node", "bun": "node", "go": "go",

@@ -292,7 +292,7 @@ _TOOLS_FOR_MANAGER: dict[str, tuple[str, ...]] = {
 _HINTED_TOOL = {
     "node": "node", "rust": "cargo", "ruby": "ruby", "go": "go", "dotnet": "dotnet",
     "cpp": "cmake",
-}
+}  # fmt: skip
 _MINIMUM_HINTS = {"go", "cpp"}
 # The manager whose tools a program needs, where the two names differ.
 _MANAGER_FOR_PROGRAM = {

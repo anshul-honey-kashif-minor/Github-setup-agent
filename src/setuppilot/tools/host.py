@@ -21,6 +21,10 @@ _ENVIRONMENT_KEYS = (
     ("HKEY_LOCAL_MACHINE", r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
     ("HKEY_CURRENT_USER", "Environment"),
 )
+_KNOWN_WINDOWS_FOLDERS = (
+    r"C:\Program Files (x86)\GnuWin32\bin",
+    r"C:\Program Files\GnuWin32\bin",
+)
 
 
 def host_os(host: ExecTarget) -> HostOs:
@@ -74,6 +78,9 @@ def refresh_path() -> None:
         except FileNotFoundError:
             continue
         saved += winreg.ExpandEnvironmentStrings(value).split(";")
+    for folder in _KNOWN_WINDOWS_FOLDERS:
+        if Path(folder).is_dir():
+            saved.append(folder)
     os.environ["PATH"] = with_new_entries(os.environ.get("PATH", ""), saved)
 
 

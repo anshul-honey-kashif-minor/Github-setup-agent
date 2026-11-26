@@ -261,6 +261,9 @@ class PostgresRunStore:
             conn.execute("delete from runs where id = %s", (_run_uuid(run_id),))
 
     def add_step(self, step: Step) -> None:
+        exit_code = step.exit_code
+        if exit_code is not None and not (-9223372036854775808 <= exit_code <= 9223372036854775807):
+            exit_code = -1
         with _connection(self._pool) as conn, _unknown_run_is_lookup_error(step.run_id):
             conn.execute(
                 "insert into steps (run_id, name, tool, arguments, result_summary, is_ok, "
@@ -274,7 +277,7 @@ class PostgresRunStore:
                     step.result_summary,
                     step.is_ok,
                     step.error_type,
-                    step.exit_code,
+                    exit_code,
                     step.duration_ms,
                     step.tokens,
                     step.model,

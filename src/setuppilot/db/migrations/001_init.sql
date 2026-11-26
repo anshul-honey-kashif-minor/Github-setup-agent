@@ -24,7 +24,7 @@ create table if not exists steps (
     result_summary text not null,
     is_ok boolean not null,
     error_type text,
-    exit_code integer,
+    exit_code bigint,
     duration_ms integer not null check (duration_ms >= 0),
     -- Per-step numbers for the timeline. Run and day totals come from token_usage.
     tokens integer not null check (tokens >= 0),

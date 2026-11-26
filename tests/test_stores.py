@@ -162,6 +162,17 @@ def test_steps_come_back_in_order_with_every_field(stores):
     assert runs.list_steps(run_id) == [first, second]
 
 
+def test_step_exit_code_large_integer(stores):
+    runs, _, _ = stores
+    run_id = runs.create_run(REPO, "/home/dev/work", None).id
+    # Windows DWORD exit codes (e.g. winget 0x8A15002B = 2316632107) exceed 32-bit signed int
+    large_step = Step(
+        run_id, "install_tool", "winget", {}, "exit 2316632107", False, None, 2316632107, 100, 0, None
+    )
+    runs.add_step(large_step)
+    assert runs.list_steps(run_id)[0].exit_code == 2316632107
+
+
 def test_tokens_are_summed_per_run(stores):
     runs, usage_store, _ = stores
     run_id = runs.create_run(REPO, "/home/dev/work", None).id
